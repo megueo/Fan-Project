@@ -2,7 +2,7 @@
 
 [![Unity CI](https://github.com/megueo/Fan-Project/actions/workflows/unity-ci.yml/badge.svg)](https://github.com/megueo/Fan-Project/actions/workflows/unity-ci.yml)
 
-> Click on this badge to see the build and test logs.
+> Click on the badge above to see the build and test logs :D
 
 ---
 
