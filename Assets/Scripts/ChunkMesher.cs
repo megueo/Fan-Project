@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 // These lines have assignment levels to ensure they are in the code, these predefined components create the mesh (the geometrical shape the Unity draws)

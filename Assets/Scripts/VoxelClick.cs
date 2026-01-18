@@ -10,7 +10,7 @@ public class VoxelPicker : MonoBehaviour
     {
         if (Mouse.current == null || chunk == null) return;
 
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+        if (Mouse.current.rightButton.wasPressedThisFrame)
         {
             Ray r = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (Physics.Raycast(r, out RaycastHit hit, 200f))

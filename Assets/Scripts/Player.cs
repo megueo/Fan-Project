@@ -1,6 +1,4 @@
 using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using Unity.Cinemachine;
 
@@ -11,20 +9,13 @@ namespace RTSCamera
         [Header("Movement")]
         [SerializeField] float MoveSpeed = 20f;
         [SerializeField] AnimationCurve MoveSpeedZoomCurve = AnimationCurve.Linear(0f, 0.5f, 1f, 1f);
-
         [SerializeField] float Acceleration = 10f;
         [SerializeField] float Deceleration = 10f;
-
-        [Space(10)]
         [SerializeField] float SprintSpeedMultiplier = 3f;
-
-        [Space(10)]
         [SerializeField] float EdgeScrollMargin = 15f;
 
         Vector2 edgeScrollInput;
-
         float decelerationMultiplier = 1f;
-
         Vector3 Velocity = Vector3.zero;
 
         [Header("Orbit")]
@@ -34,15 +25,13 @@ namespace RTSCamera
         [Header("Zoom")]
         [SerializeField] float ZoomSpeed = 0.5f;
         [SerializeField] float ZoomSmoothing = 5f;
-
         float CurrentZoomSpeed = 0f;
 
-        public float ZoomLevel // 0 to 1 (zoom in/zoom out)
+        public float ZoomLevel
         {
             get
             {
                 InputAxis axis = OrbitalFollow.RadialAxis;
-
                 return Mathf.InverseLerp(axis.Range.x, axis.Range.y, axis.Value);
             }
         }
@@ -51,115 +40,66 @@ namespace RTSCamera
         [SerializeField] Transform CameraTarget;
         [SerializeField] CinemachineOrbitalFollow OrbitalFollow;
 
-
         #region Input
-
         Vector2 moveInput;
         Vector2 scrollInput;
         Vector2 lookInput;
         bool sprintInput;
-        bool middleCLickInput = false;
+        bool middleClickInput = false;
 
-        private CursorLockMode previousLockState;
-        private bool previousCursorVisible;
-
-        void OnSprint(InputValue value)
-        {
-            sprintInput = value.isPressed;
-        }
-
-        void OnMove(InputValue value)
-        {
-            moveInput = value.Get<Vector2>();
-        }
-
-        void OnLook(InputValue value)
-        {
-            lookInput = value.Get<Vector2>();
-        }
-
-        void OnScrollWheel(InputValue value)
-        {
-            scrollInput = value.Get<Vector2>();
-        }
+        void OnSprint(InputValue value) => sprintInput = value.isPressed;
+        void OnMove(InputValue value) => moveInput = value.Get<Vector2>();
+        void OnLook(InputValue value) => lookInput = value.Get<Vector2>();
+        void OnScrollWheel(InputValue value) => scrollInput = value.Get<Vector2>();
 
         void OnMiddleClick(InputValue value)
         {
-            // lock cursor 
-            bool pressed = value.isPressed;
-            if (pressed && !middleCLickInput)
-            {
-               
-                previousLockState = Cursor.lockState;
-                previousCursorVisible = Cursor.visible;
+            middleClickInput = value.isPressed;
 
+            if (middleClickInput)
+            {
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }
-            else if (!pressed && middleCLickInput)
+            else
             {
-                
-                Cursor.lockState = previousLockState;
-                Cursor.visible = previousCursorVisible;
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
             }
-
-            middleCLickInput = pressed;
         }
-
         #endregion
 
         #region Unity Methods
+        private void Start()
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
 
         private void LateUpdate()
         {
             float deltaTime = Time.unscaledDeltaTime;
 
             if (!Application.isEditor)
-            {
                 UpdateEdgeScrolling();
-            }
 
-            UpdateOrbit(deltaTime);
             UpdateMovement(deltaTime);
+            UpdateOrbit(deltaTime);
             UpdateZoom(deltaTime);
         }
-
-        private void OnDisable()
-        {
-            
-            Cursor.lockState = previousLockState;
-            Cursor.visible = previousCursorVisible;
-        }
-
         #endregion
 
-        #region Controll Methods
-
+        #region Control Methods
         void UpdateEdgeScrolling()
         {
             Vector2 mousePosition = Mouse.current.position.ReadValue();
-
             edgeScrollInput = Vector2.zero;
 
+            if (mousePosition.x <= EdgeScrollMargin) edgeScrollInput.x = -1f;
+            else if (mousePosition.x >= Screen.width - EdgeScrollMargin) edgeScrollInput.x = 1f;
 
-            if (mousePosition.x <= EdgeScrollMargin)
-            {
-                edgeScrollInput.x = -1f;
-            }
-            else if (mousePosition.x >= Screen.width - EdgeScrollMargin)
-            {
-                edgeScrollInput.x = 1f;
-            }
-
-            if (mousePosition.y <= EdgeScrollMargin)
-            {
-                edgeScrollInput.y = -1f;
-            }
-            else if (mousePosition.y >= Screen.height - EdgeScrollMargin)
-            {
-                edgeScrollInput.y = 1f;
-            }
-
+            if (mousePosition.y <= EdgeScrollMargin) edgeScrollInput.y = -1f;
+            else if (mousePosition.y >= Screen.height - EdgeScrollMargin) edgeScrollInput.y = 1f;
         }
 
         void UpdateMovement(float deltaTime)
@@ -176,26 +116,19 @@ namespace RTSCamera
             inputVector.Normalize();
 
             float zoomMultiplier = MoveSpeedZoomCurve.Evaluate(ZoomLevel);
-
             Vector3 targetVelocity = inputVector * MoveSpeed * zoomMultiplier;
 
             float sprintFactor = 1f;
-
             if (sprintInput)
             {
                 targetVelocity *= SprintSpeedMultiplier;
-
                 sprintFactor = SprintSpeedMultiplier;
             }
 
             if (inputVector.sqrMagnitude > 0.01f)
             {
                 Velocity = Vector3.MoveTowards(Velocity, targetVelocity, Acceleration * sprintFactor * deltaTime);
-
-                if (sprintInput)
-                {
-                    decelerationMultiplier = SprintSpeedMultiplier;
-                }
+                if (sprintInput) decelerationMultiplier = SprintSpeedMultiplier;
             }
             else
             {
@@ -203,32 +136,22 @@ namespace RTSCamera
             }
 
             Vector3 motion = Velocity * deltaTime;
-
             CameraTarget.position += forward * motion.z + right * motion.x;
 
             if (Velocity.sqrMagnitude <= 0.01f)
-            {
                 decelerationMultiplier = 1f;
-            }
-
         }
 
         void UpdateOrbit(float deltaTime)
         {
-            Vector2 orbitInput = lookInput * (middleCLickInput ? 1f : 0f);
-
+            Vector2 orbitInput = lookInput * (middleClickInput ? 1f : 0f);
             orbitInput *= OrbitSensitivity;
 
             InputAxis horizontalAxis = OrbitalFollow.HorizontalAxis;
             InputAxis verticalAxis = OrbitalFollow.VerticalAxis;
 
-            // horizontalAxis.Value += orbitInput.x;
-            // verticalAxis.Value -= orbitInput.y;
-
             horizontalAxis.Value = Mathf.Lerp(horizontalAxis.Value, horizontalAxis.Value + orbitInput.x, OrbitSmoothing * deltaTime);
             verticalAxis.Value = Mathf.Lerp(verticalAxis.Value, verticalAxis.Value - orbitInput.y, OrbitSmoothing * deltaTime);
-
-            // horizontalAxis.Value = Mathf.Clamp(horizontalAxis.Value, horizontalAxis.Range.x, horizontalAxis.Range.y);
             verticalAxis.Value = Mathf.Clamp(verticalAxis.Value, verticalAxis.Range.x, verticalAxis.Range.y);
 
             OrbitalFollow.HorizontalAxis = horizontalAxis;
@@ -238,23 +161,14 @@ namespace RTSCamera
         void UpdateZoom(float deltaTime)
         {
             InputAxis axis = OrbitalFollow.RadialAxis;
-
-            float targetZoomSpeed = 0f;
-
-            if (Mathf.Abs(scrollInput.y) > 0.01f)
-            {
-                targetZoomSpeed = ZoomSpeed * scrollInput.y;
-            }
+            float targetZoomSpeed = Mathf.Abs(scrollInput.y) > 0.01f ? ZoomSpeed * scrollInput.y : 0f;
 
             CurrentZoomSpeed = Mathf.Lerp(CurrentZoomSpeed, targetZoomSpeed, ZoomSmoothing * deltaTime);
-
             axis.Value -= CurrentZoomSpeed;
             axis.Value = Mathf.Clamp(axis.Value, axis.Range.x, axis.Range.y);
 
             OrbitalFollow.RadialAxis = axis;
         }
-
         #endregion
     }
-
 }
