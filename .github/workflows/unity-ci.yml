@@ -1,0 +1,24 @@
+name: Unity CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+
+      - name: Build project
+        uses: game-ci/unity-builder@v4
+        with:
+          unityVersion: 2022.3.0f1
+          targetPlatform: StandaloneWindows64
