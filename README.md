@@ -4,4 +4,4 @@
 
 ---
 
-RTS game based in Castle Story (Sauropod Studio) made on Unity.
+RTS game based in **Castle Story (Sauropod Studio)** made on Unity.
