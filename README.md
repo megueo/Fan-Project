@@ -25,10 +25,10 @@ RTS game based on **Castle Story (Sauropod Studio)**, made in Unity.
 **Left Mouse Button:** Select Units\
 **Right Mouse Button:** Move Units
 
-## Dev Tools (Run the Game)
+## Dev Tools:
 
-**Slash Key (/):** Open the console\ 
-**ESC Key or Slash Key (/) again:** Close the console
+**Slash Key (/):** Open the console\
+**ESC Key or Slash Key (/) again:** Close the console\
 
 ### Current Commands: 
 ```clear```, ```spawn totem``` 
