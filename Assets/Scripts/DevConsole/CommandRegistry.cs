@@ -9,6 +9,7 @@ public static class CommandRegistry
 
     static CommandRegistry()
     {
+        Register("landscape", LandScape);
         Register("help", Help);
         Register("echo", Echo);
         Register("give", Give);
@@ -54,6 +55,44 @@ public static class CommandRegistry
     static void Give(string[] args)
     {
 
+    }
+
+    static void LandScape(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            DevConsole.Instance.Log("Usage: landscape <Air|Stone> or none to stop using it");
+            return;
+        }
+
+        switch (args[0].ToLower())
+        {
+            case "none":
+                {
+                    Builder.Instance.ChangeStragedy(null);
+                    break;
+                } 
+            case "air":
+                {
+                    Builder.Instance.ChangeStragedy(new SphereLandscapeStragedy(BlockType.Air));
+                    break;
+                }
+            case "dirt":
+                {
+                    Builder.Instance.ChangeStragedy(new SphereLandscapeStragedy(BlockType.Dirt));
+                    break;
+                }
+            case "stone":
+                {
+                    Builder.Instance.ChangeStragedy(new SphereLandscapeStragedy(BlockType.Stone));
+                    break;
+                }
+            case "grass":
+                {
+                    Builder.Instance.ChangeStragedy(new SphereLandscapeStragedy(BlockType.Grass));
+                    break;
+                }
+        }
     }
 
     static void Spawn(string[] args)
