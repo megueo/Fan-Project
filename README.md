@@ -31,4 +31,4 @@ RTS game based on **Castle Story (Sauropod Studio)**, made in Unity.
 **ESC Key or Slash Key (/) again:** Close the console
 
 ### Current Commands: 
-```clear```, ```spawn totem``` 
+```clear```, ```spawn totem```, ```landscape none, air, dirt, grass, stone```

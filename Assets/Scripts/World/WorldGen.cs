@@ -46,6 +46,15 @@ public class WorldGen : MonoBehaviour
         };
     }
 
+    //I made this function because the GetChunkFromWorld function was private and I was thinking of doing a whole update mesh 
+    //thing in here. But I decided to leave those kinds of responsibilities up to you and just get the landscape working 
+    //as quick as possible. So I decided to rename the field and did a quick and kinda pointless Get function.
+    //feel free to complain and tell me how to use your code - Lonely
+    public Chunk GetChunk(int x, int z)
+    {
+         return GetChunkFromWorld(x, z);
+    }
+
     public bool IsSolid(int x, int y, int z)
     {
         Chunk chunk = GetChunkFromWorld(x, z);

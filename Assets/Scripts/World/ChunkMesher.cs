@@ -148,6 +148,8 @@ public class ChunkMesher : MonoBehaviour
 
         mf.mesh = m;
         mc.sharedMesh = m;
+        //For more detailed colliders and placement. May or may not cause performance issues - Lonely
+        mc.convex = false;
 
         var renderer = GetComponent<MeshRenderer>();
         renderer.materials = new[] {
