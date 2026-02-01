@@ -116,7 +116,7 @@ public class WorldGen : MonoBehaviour
         return chunk;
     }
 
-    Vector3Int WorldToLocal(int x, int y, int z)
+    public Vector3Int WorldToLocal(int x, int y, int z)
     {
         int lx = x % chunkSize;
         int lz = z % chunkSize;
@@ -126,7 +126,7 @@ public class WorldGen : MonoBehaviour
         return new Vector3Int(lx, y, lz);
     }
 
-    bool InBounds(Chunk c, Vector3Int l) =>
+    public bool InBounds(Chunk c, Vector3Int l) =>
         l.x >= 0 && l.y >= 0 && l.z >= 0 &&
         l.x < c.size && l.y < c.size && l.z < c.size;
 }

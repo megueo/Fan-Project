@@ -1,24 +1,27 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class TotemSystem : MonoBehaviour
 {
-    [Header("Unit Spawn")]
+    [Header("Unit Spawn Settings")]
     public GameObject unitPrefab;
     public float spawnInterval = 5f;
     public int maxAliveUnits = 5;
     public int spawnRadius = 3;
 
-    Vector3Int gridPos;
-    float timer;
-    int aliveUnits;
+    private Vector3Int gridPos;
+    private float timer;
+    private int aliveUnits;
 
     void Awake()
     {
-        WorldGen.Instance.TryGetGroundY(
+        if (!WorldGen.Instance.TryGetGroundY(
             Mathf.RoundToInt(transform.position.x),
             Mathf.RoundToInt(transform.position.z),
-            out int groundY
-        );
+            out int groundY))
+        {
+            groundY = Mathf.RoundToInt(transform.position.y);
+        }
 
         gridPos = new Vector3Int(
             Mathf.RoundToInt(transform.position.x),
@@ -43,26 +46,43 @@ public class TotemSystem : MonoBehaviour
     {
         if (unitPrefab == null) return;
 
-        if (!WorldGen.Instance.TryGetGroundY(gridPos.x, gridPos.z, out int groundY))
+        int baseX = Mathf.RoundToInt(transform.position.x);
+        int baseZ = Mathf.RoundToInt(transform.position.z);
+
+        for (int attempt = 0; attempt < 10; attempt++)
+        {
+            Vector2 offset = Random.insideUnitCircle * spawnRadius;
+            int x = baseX + Mathf.RoundToInt(offset.x);
+            int z = baseZ + Mathf.RoundToInt(offset.y);
+
+            if (!WorldGen.Instance.TryGetGroundY(x, z, out int groundY))
+                continue;
+
+            int spawnY = groundY + 1;
+
+            if (!WorldGen.Instance.IsWalkable(x, spawnY, z))
+                continue;
+
+            Vector3 spawnPos = new Vector3(
+                x + 0.5f,
+                spawnY,
+                z + 0.5f
+            );
+
+            GameObject unitGO = Instantiate(unitPrefab, spawnPos, Quaternion.identity);
+
+            UnitSystem unit = unitGO.GetComponent<UnitSystem>();
+            if (unit == null)
+            {
+                Destroy(unitGO);
+                return;
+            }
+
+            unit.Init(this);
+            aliveUnits++;
+
             return;
-
-        gridPos.y = groundY + 1;
-
-        var spots = WorldGen.Instance.GetWalkableRing(gridPos, spawnRadius, gridPos.y);
-        if (spots.Count == 0) spots.Add(gridPos);
-
-        Vector3Int p = spots[Random.Range(0, spots.Count)];
-        Vector3 spawnWorldPos = p + new Vector3(0.5f, 0f, 0.5f);
-
-        GameObject unitGO = Instantiate(unitPrefab, spawnWorldPos, Quaternion.identity);
-
-        UnitGeneric unit = unitGO.GetComponent<UnitGeneric>();
-        if (unit == null)
-            unit = unitGO.AddComponent<UnitGeneric>();
-
-        unit.ownerTotem = this;
-
-        aliveUnits++;
+        }
     }
 
     public void NotifyUnitDeath()

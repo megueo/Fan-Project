@@ -47,6 +47,4 @@ MonoBehaviour:
   unitPrefab: {fileID: 3393695322962393640, guid: d538526f0b567e744a8ca89cc8bc551c, type: 3}
   spawnInterval: 1
   maxAliveUnits: 5
-  spawnRadius: 8
-  debugSpawns: 1
-  forceDebugCapsule: 1
+  spawnRadius: 5

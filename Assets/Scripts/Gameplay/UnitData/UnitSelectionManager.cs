@@ -1,27 +1,34 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
 public class UnitSelectionManager : MonoBehaviour
 {
     public static UnitSelectionManager Instance { get; private set; }
 
-    [Header("Units")]
-    public List<GameObject> allUnitsList = new List<GameObject>();
-    public HashSet<GameObject> unitsSelected = new HashSet<GameObject>();
-
-    [Header("Markers")]
-    public LayerMask clickable; 
+    [Header("Layers")]
+    public LayerMask clickable;
     public LayerMask ground;
-    public GameObject selectionIndicatorPrefab;
+
+    [Header("Visuals")]
+    public GameObject selectionIndicatorPrefab = null;
 
     private Camera cam;
 
+    private readonly HashSet<GameObject> allUnits = new();
+    private readonly HashSet<GameObject> selectedUnits = new();
+
+    #region Unity
+
     private void Awake()
     {
-        if (Instance != null && Instance != this) Destroy(gameObject);
-        else Instance = this;
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
     }
 
     private void Start()
@@ -31,25 +38,48 @@ public class UnitSelectionManager : MonoBehaviour
 
     private void Update()
     {
-        HandleLeftClickSelection();
-        HandleRightClickMovement();
+        HandleSelectionInput();
+        HandleMovementInput();
     }
+
+    #endregion
+
+    #region Public API (Units)
+
+    public void RegisterUnit(GameObject unit)
+    {
+        allUnits.Add(unit);
+        Debug.Log($"[Selection] Unit registrada: {unit.name}");
+    }
+
+    public void UnregisterUnit(GameObject unit)
+    {
+        allUnits.Remove(unit);
+        selectedUnits.Remove(unit);
+    }
+
+    #endregion
 
     #region Selection
 
-    private void HandleLeftClickSelection()
+    private void HandleSelectionInput()
     {
-        if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame) return;
+        if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame)
+            return;
 
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
+
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, clickable))
         {
-            GameObject unit = hit.collider.gameObject;
+            UnitSelectable selectable = hit.collider.GetComponentInParent<UnitSelectable>();
+            if (selectable == null) return;
+
+            GameObject unit = selectable.gameObject;
 
             if (Keyboard.current.leftShiftKey.isPressed)
-                MultiSelect(unit);
+                ToggleSelection(unit);
             else
-                SelectByClicking(unit);
+                SelectSingle(unit);
         }
         else if (!Keyboard.current.leftShiftKey.isPressed)
         {
@@ -57,105 +87,97 @@ public class UnitSelectionManager : MonoBehaviour
         }
     }
 
-    private void MultiSelect(GameObject unit)
+    private void ToggleSelection(GameObject unit)
     {
-        if (!unitsSelected.Contains(unit))
-        {
-            unitsSelected.Add(unit);
-            TriggerSelectionIndicator(unit, true);
-        }
+        if (selectedUnits.Contains(unit))
+            Deselect(unit);
         else
-        {
-            TriggerSelectionIndicator(unit, false);
-            unitsSelected.Remove(unit);
-        }
+            Select(unit);
     }
 
-    private void SelectByClicking(GameObject unit)
+    private void SelectSingle(GameObject unit)
     {
-        if (unitsSelected.Count == 1 && unitsSelected.Contains(unit))
-        {
-            TriggerSelectionIndicator(unit, false);
-            unitsSelected.Remove(unit);
-            return;
-        }
-
         DeselectAll();
-        unitsSelected.Add(unit);
-        TriggerSelectionIndicator(unit, true);
+        Select(unit);
+    }
+
+    private void Select(GameObject unit)
+    {
+        selectedUnits.Add(unit);
+        SetIndicator(unit, true);
+    }
+
+    private void Deselect(GameObject unit)
+    {
+        selectedUnits.Remove(unit);
+        SetIndicator(unit, false);
     }
 
     private void DeselectAll()
     {
-        foreach (var unit in unitsSelected)
-            TriggerSelectionIndicator(unit, false);
+        foreach (var unit in selectedUnits)
+            SetIndicator(unit, false);
 
-        unitsSelected.Clear();
+        selectedUnits.Clear();
     }
 
-    private void TriggerSelectionIndicator(GameObject unit, bool isVisible)
+    private void SetIndicator(GameObject unit, bool active)
     {
         Transform indicator = unit.transform.Find("SelectionIndicator");
 
-        if (indicator == null && isVisible)
+        if (indicator == null && active)
         {
             GameObject inst = Instantiate(selectionIndicatorPrefab, unit.transform);
             inst.name = "SelectionIndicator";
 
-            Collider col = unit.GetComponent<Collider>();
-            float yOffset = 0.05f;
-
-            if (col != null)
-                inst.transform.localPosition = new Vector3(0, -col.bounds.extents.y + yOffset, 0);
-            else
-                inst.transform.localPosition = new Vector3(0, 0.1f, 0);
+            Collider col = unit.GetComponentInChildren<Collider>();
+            float y = col != null ? -col.bounds.extents.y + 0.05f : 0.1f;
+            inst.transform.localPosition = new Vector3(0, y, 0);
 
             indicator = inst.transform;
         }
 
         if (indicator != null)
-            indicator.gameObject.SetActive(isVisible);
+            indicator.gameObject.SetActive(active);
     }
-
 
     #endregion
 
     #region Movement
 
-    private void HandleRightClickMovement()
+    private void HandleMovementInput()
     {
-        if (Mouse.current == null || !Mouse.current.rightButton.wasPressedThisFrame || unitsSelected.Count == 0)
+        if (Mouse.current == null ||
+            !Mouse.current.rightButton.wasPressedThisFrame ||
+            selectedUnits.Count == 0)
             return;
 
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, ground))
+
+        if (!Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, ground))
+            return;
+
+        Vector3 destination = hit.point;
+
+        int cols = Mathf.CeilToInt(Mathf.Sqrt(selectedUnits.Count));
+        float spacing = 1.3f;
+
+        int i = 0;
+        foreach (var unit in selectedUnits)
         {
-            Vector3 destination = hit.point;
+            int row = i / cols;
+            int col = i % cols;
 
-            Debug.Log($"[Selection] Right click at {destination}");
+            Vector3 offset = new(
+                (col - cols / 2f) * spacing,
+                0,
+                (row - cols / 2f) * spacing
+            );
 
-            var units = new List<GameObject>(unitsSelected);
+            if (unit.TryGetComponent(out UnitMovement move))
+                move.MoveTo(destination + offset);
 
-            float spacing = 1.2f;
-            int cols = Mathf.CeilToInt(Mathf.Sqrt(units.Count));
-
-            for (int i = 0; i < units.Count; i++)
-            {
-                int row = i / cols;
-                int col = i % cols;
-
-                Vector3 offset = new Vector3(
-                    (col - cols / 2f) * spacing,
-                    0,
-                    (row - cols / 2f) * spacing
-                );
-
-                Vector3 target = destination + offset;
-
-                UnitMovement movement = units[i].GetComponent<UnitMovement>();
-                if (movement != null)
-                    movement.MoveTo(target);
-            }
+            i++;
         }
     }
 
