@@ -1,7 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class VoxelPicker : MonoBehaviour
+public class VoxelClick : MonoBehaviour
 {
     public Chunk chunk;
     Vector3Int? selected;

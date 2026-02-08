@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -49,7 +49,6 @@ public class UnitSelectionManager : MonoBehaviour
     public void RegisterUnit(GameObject unit)
     {
         allUnits.Add(unit);
-        Debug.Log($"[Selection] Unit registrada: {unit.name}");
     }
 
     public void UnregisterUnit(GameObject unit)
@@ -103,14 +102,22 @@ public class UnitSelectionManager : MonoBehaviour
 
     private void Select(GameObject unit)
     {
+        bool wasEmpty = selectedUnits.Count == 0;
+
         selectedUnits.Add(unit);
         SetIndicator(unit, true);
+
+        if (wasEmpty)
+            Pathfinder.Instance?.ShowDebug();
     }
 
     private void Deselect(GameObject unit)
     {
         selectedUnits.Remove(unit);
         SetIndicator(unit, false);
+
+        if (selectedUnits.Count == 0)
+            Pathfinder.Instance?.HideDebug();
     }
 
     private void DeselectAll()
@@ -119,6 +126,8 @@ public class UnitSelectionManager : MonoBehaviour
             SetIndicator(unit, false);
 
         selectedUnits.Clear();
+
+        Pathfinder.Instance?.HideDebug();
     }
 
     private void SetIndicator(GameObject unit, bool active)

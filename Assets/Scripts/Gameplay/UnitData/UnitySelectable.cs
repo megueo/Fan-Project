@@ -2,13 +2,23 @@ using UnityEngine;
 
 public class UnitSelectable : MonoBehaviour
 {
-    private void OnEnable()
+    void OnEnable()
     {
         UnitSelectionManager.Instance?.RegisterUnit(gameObject);
     }
 
-    private void OnDisable()
+    void OnDisable()
     {
         UnitSelectionManager.Instance?.UnregisterUnit(gameObject);
+    }
+
+    public void OnSelected()
+    {
+        Pathfinder.Instance?.ShowDebug();
+    }
+
+    public void OnDeselected()
+    {
+        Pathfinder.Instance?.HideDebug();
     }
 }
