@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 //Builder, Works hand in hand with structures and blocks to build them
+//Note to self: Look up a dictionary before you name a core component of a project
 public class Builder : MonoBehaviour
 {
     public static Builder Instance;
@@ -10,7 +11,7 @@ public class Builder : MonoBehaviour
     public Mesh SphereGraphic;
     //Likely gonna be general
     public Material TransparentMaterial;
-    public IBuilderStragedy stragedy;
+    public IBuilderStrategy strategy;
     bool hold;
 
     public void Start()
@@ -20,33 +21,67 @@ public class Builder : MonoBehaviour
 
     private void Update()
     {
-        if (stragedy == null) return;
+        if (strategy == null) return;
 
-        stragedy.Preview();
+        strategy.Preview();
 
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
-            stragedy.OnMouseDown();
+            strategy.OnMouseDown();
             hold = true;
         }
         if(hold == true)
         {
-            stragedy.OnMousePerform();
+            strategy.OnMousePerform();
         }
         if (Mouse.current.leftButton.wasReleasedThisFrame)
         {
-            stragedy.OnMouseUp();
+            strategy.OnMouseUp();
             hold = false;
+        }
+        if (Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            strategy.OnRotate();
         }
     }
 
-    public void ChangeStragedy(IBuilderStragedy stragedy)
+    public void ChangeStrategy(IBuilderStrategy stragedy)
     {
-        if (this.stragedy != null)
+        if (this.strategy != null)
         {
-            this.stragedy.Dispose();
-            this.stragedy = null;
+            this.strategy.Dispose();
+            this.strategy = null;
         }
-        this.stragedy = stragedy;
+        this.strategy = stragedy;
+    }
+
+    public void ChangeBuilderToPiller(GameObject BlockPrefab)
+    {
+        PillerStrategy line = new PillerStrategy(BlockPrefab);
+        ChangeStrategy(line);
+    }
+
+    public void ChangeBuilderToScaffhold(GameObject BlockPrefab)
+    {
+        ScaffholdingStrategy line = new ScaffholdingStrategy(BlockPrefab);
+        ChangeStrategy(line);
+    }
+
+    public void ChangeBuilderToHeight(GameObject BlockPrefab)
+    {
+        VerticalObjectStrategy line = new VerticalObjectStrategy(BlockPrefab);
+        ChangeStrategy(line);
+    }
+
+    public void ChangeBuilderToSingle(GameObject BlockPrefab)
+    {
+        SingleObjectStrategy line = new SingleObjectStrategy(BlockPrefab);
+        ChangeStrategy(line);
+    }
+
+    public void ChangeBuilderToLine(GameObject BlockPrefab)
+    {
+        DragLineStrategy line = new DragLineStrategy(BlockPrefab);
+        ChangeStrategy(line);
     }
 }

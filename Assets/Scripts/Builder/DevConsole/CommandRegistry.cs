@@ -68,19 +68,19 @@ public static class CommandRegistry
         switch (args[0].ToLower())
         {
             case "none":
-                Builder.Instance.ChangeStragedy(null);
+                Builder.Instance.ChangeStrategy(null);
                 break;
             case "air":
-                Builder.Instance.ChangeStragedy(new SphereLandscapeStragedy(ChunkBlockType.Air));
+                Builder.Instance.ChangeStrategy(new SphereLandscapeStrategy(ChunkBlockType.Air));
                 break;
             case "dirt":
-                Builder.Instance.ChangeStragedy(new SphereLandscapeStragedy(ChunkBlockType.Dirt));
+                Builder.Instance.ChangeStrategy(new SphereLandscapeStrategy(ChunkBlockType.Dirt));
                 break;
             case "stone":
-                Builder.Instance.ChangeStragedy(new SphereLandscapeStragedy(ChunkBlockType.Stone));
+                Builder.Instance.ChangeStrategy(new SphereLandscapeStrategy(ChunkBlockType.Stone));
                 break;
             case "grass":
-                Builder.Instance.ChangeStragedy(new SphereLandscapeStragedy(ChunkBlockType.Grass));
+                Builder.Instance.ChangeStrategy(new SphereLandscapeStrategy(ChunkBlockType.Grass));
                 break;
         }
     }
