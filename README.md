@@ -12,7 +12,7 @@ RTS game based on **Castle Story (Sauropod Studio)**, made in Unity.
 
 ## How to Run?
 
-1. Clone this project with ```git clone https://github.com/megueo/Fan-Project.git``` 
+1. Clone this project with ```git clone https://github.com/megueo/Fan-Project.git```
 2. Open **Unity Hub**
 3. Click in **Add**
 4. Search the project in disk
@@ -24,12 +24,12 @@ RTS game based on **Castle Story (Sauropod Studio)**, made in Unity.
 **Press & Hold Scroll Wheel:** Move the camera angles\
 **Left Mouse Button:** Select Units\
 **Right Mouse Button:** Move Units
-**Left Shift Button:** Increase Camera movement speed 
+**Left Shift Button:** Increase Camera movement speed
 
 ## Dev Tools:
 
 **Slash Key (/):** Open the console\
 **ESC Key or Slash Key (/) again:** Close the console
 
-### Current Commands: 
+### Current Commands:
 ```clear```, ```spawn totem```, ```landscape none, air, dirt, grass, stone```

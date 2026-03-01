@@ -30,7 +30,7 @@ public class ChunkMesher : MonoBehaviour
     };
 
     static readonly int[][] faces = { // Faces of the cubes (6 in total)
-        new[]{3,2,1,0}, //front = Index 0'
+        new[]{3,2,1,0}, //front = Index 0
         new[]{6,7,4,5}, // back = Index 1
         new[]{7,3,0,4}, // left = Index 2
         new[]{2,6,5,1}, // right = Index 3
@@ -38,7 +38,7 @@ public class ChunkMesher : MonoBehaviour
         new[]{0,1,5,4}, //lower = Index 5
     };
 
-    static readonly Vector3Int[] dirs = { // Voxel unit directions 
+    static readonly Vector3Int[] dirs = { // Voxel unit directions
         new(0,0,-1), // front
         new(0,0,1),// back
         new(-1,0,0), //left
@@ -66,7 +66,7 @@ public class ChunkMesher : MonoBehaviour
 
         var uvs = new List<Vector2>(); // UVs are texture positions
 
-        int size = chunk.size; 
+        int size = chunk.size;
 
         for (int x = 0; x < size; x++) // Voxels in X
             for (int y = 0; y < size; y++) // Voxels in Y
