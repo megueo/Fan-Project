@@ -1,64 +1,19 @@
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.InputSystem;
-
-//General interface for different ways of placing stuff, In a straight line, or drag over a wide field, or replace a blocktype within a sphere
-public interface IBuilderStragedy
-{
-    public void Dispose();
-    public void OnMouseDown();
-    public void OnMousePerform();
-    public void OnMouseUp();
-    public void OnPrefabChange();
-    public void Preview();
-}
-
-//Gonna make this sometime soon, This is more for bricks or thing's that are suppose to go in a straight line - Lonely
-public class DragLineStragedy : IBuilderStragedy
-{
-    public void Dispose()
-    {
-
-    }
-
-    public void OnMouseDown()
-    {
-
-    }
-
-    public void OnMousePerform()
-    {
-        
-    }
-
-    public void OnMouseUp()
-    {
-
-    }
-
-    public void OnPrefabChange()
-    {
-        
-    }
-
-    public void Preview()
-    {
-
-    }
-}
-
 //Meant for landscaping, I'll likely add more landscaping tools meant for islands
-public class SphereLandscapeStragedy : IBuilderStragedy
+using System.Collections.Generic;
+using UnityEngine.InputSystem;
+using UnityEngine;
+
+public class SphereLandscapeStrategy : IBuilderStrategy
 {
     GameObject SphereGraphic;
     public ChunkBlockType type;
     Vector3Int GridPosition;
     float t;
 
-    public SphereLandscapeStragedy(ChunkBlockType type)
+    public SphereLandscapeStrategy(ChunkBlockType type)
     {
         this.type = type;
-        if(this.SphereGraphic == null)
+        if (this.SphereGraphic == null)
         {
             this.SphereGraphic = new GameObject();
             this.SphereGraphic.AddComponent<MeshFilter>().mesh = Builder.Instance.SphereGraphic;
@@ -75,7 +30,7 @@ public class SphereLandscapeStragedy : IBuilderStragedy
 
     public void OnMouseDown()
     {
-        
+
     }
 
     public void OnMousePerform()
@@ -127,7 +82,7 @@ public class SphereLandscapeStragedy : IBuilderStragedy
         t = 0;
     }
 
-    public void OnPrefabChange()
+    public void OnRotate()
     {
 
     }
@@ -141,7 +96,7 @@ public class SphereLandscapeStragedy : IBuilderStragedy
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
         if (Physics.Raycast(ray, out RaycastHit hit, 100f))
         {
-            GridPosition = Vector3Int.FloorToInt(hit.point);
+            GridPosition = Vector3Int.FloorToInt(hit.point + hit.normal * 0.01f);
             SphereGraphic.transform.position = GridPosition;
             SphereGraphic.SetActive(true);
         }

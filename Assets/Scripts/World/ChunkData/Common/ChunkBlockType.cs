@@ -4,5 +4,13 @@ public enum ChunkBlockType : byte
     Dirt,
     Grass,
     Stone,
-    TotemCore
+    TotemCore,
+    Brick,
+    Slope, 
+    Stair,
+    Ladder,
+    Statue,
+    Door, 
+    Scaffholding,
+    Piller
 }
